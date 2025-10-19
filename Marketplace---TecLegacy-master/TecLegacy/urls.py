@@ -23,10 +23,10 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('products.urls')),  # La página principal estará en la app products
     path('users/', include('users.urls')),
     path('cart/', include('cart.urls')),
     path('chatbot/', include('chatbot.urls')),
+    path('', include('products.urls')),  # La página principal estará en la app products
 ]
 
 # Añadir estas líneas para servir archivos media durante desarrollo

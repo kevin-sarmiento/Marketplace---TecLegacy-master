@@ -36,6 +36,8 @@ def product_list(request, category_slug=None):
         'products': products_page,
     }
     return render(request, 'products/product_list.html', context)
+    products = Product.objects.filter(is_available=True)
+    return render(request, 'products/product_list.html', {'products': products})
 
 
 def product_detail(request, category_slug, product_slug):
@@ -59,6 +61,8 @@ def product_detail(request, category_slug, product_slug):
     }
     return render(request, 'products/product_detail.html', context)
 
+    product = get_object_or_404(Product, slug=product_slug, category__slug=category_slug)
+    return render(request, 'products/product_detail.html', {'product': product})
 
 def search_products(request):
     """Búsqueda de productos."""

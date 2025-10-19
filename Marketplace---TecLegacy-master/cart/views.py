@@ -39,45 +39,51 @@ def cart_detail(request):
 
 
 def add_to_cart(request, product_id):
-    """Añadir un producto al carrito."""
+    """Añadir un producto al carrito (AJAX o normal)"""
     product = get_object_or_404(Product, id=product_id, is_available=True)
     cart = _get_or_create_cart(request)
 
-    # Si la petición es AJAX
+    # Obtenemos datos
+    color_id = request.POST.get('color') or request.GET.get('color')
+    size_id = request.POST.get('size') or request.GET.get('size')
+    quantity = int(request.POST.get('quantity', 1))
+
+    color = None
+    size = None
+
+    if color_id:
+        from products.models import Color
+        color = Color.objects.filter(id=color_id).first()
+
+    if size_id:
+        from products.models import Size
+        size = Size.objects.filter(id=size_id).first()
+
+    # Verificamos si ya existe el mismo producto con ese color y talla
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=cart,
+        product=product,
+        color=color,
+        size=size,
+        defaults={'quantity': quantity}
+    )
+
+    if not created:
+        cart_item.quantity += quantity
+        cart_item.save()
+
+    # Si es AJAX, devolvemos JSON (sin redirigir)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        quantity = int(request.GET.get('quantity', 1))
-
-        # Comprueba si el producto ya está en el carrito
-        try:
-            cart_item = CartItem.objects.get(cart=cart, product=product)
-            cart_item.quantity += quantity
-            cart_item.save()
-        except CartItem.DoesNotExist:
-            cart_item = CartItem.objects.create(cart=cart, product=product, quantity=quantity)
-
-        # Devuelve respuesta JSON con información actualizada del carrito
         return JsonResponse({
             'success': True,
-            'message': f'{product.name} añadido al carrito',
+            'message': f'{product.name} agregado al carrito',
             'cart_items_count': cart.get_total_items(),
             'cart_total': str(cart.get_total_price())
         })
 
-    # Si la petición no es AJAX
-    else:
-        quantity = int(request.POST.get('quantity', 1))
+    # Si no es AJAX, redirige normalmente
+    return redirect('cart:cart_detail')
 
-        # Comprueba si el producto ya está en el carrito
-        try:
-            cart_item = CartItem.objects.get(cart=cart, product=product)
-            cart_item.quantity += quantity
-            cart_item.save()
-            messages.success(request, f'La cantidad de {product.name} ha sido actualizada en tu carrito')
-        except CartItem.DoesNotExist:
-            cart_item = CartItem.objects.create(cart=cart, product=product, quantity=quantity)
-            messages.success(request, f'{product.name} ha sido añadido a tu carrito')
-
-        return redirect('cart:cart_detail')
 
 
 def update_cart(request):

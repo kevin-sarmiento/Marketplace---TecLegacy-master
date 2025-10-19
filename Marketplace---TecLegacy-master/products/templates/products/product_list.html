@@ -61,9 +61,9 @@
                             <p class="card-text text-truncate">{{ product.description|truncatechars:60 }}</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <strong class="price">${{ product.price }}</strong>
-                                <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">
-                                    <i class="fas fa-cart-plus"></i>
-                                </button>
+    <a href="{{ product.get_absolute_url }}" class="btn btn-primary btn-sm rounded-pill px-3">
+        Detalles
+    </a>
                             </div>
                         </div>
                     </div>

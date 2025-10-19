@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import Category, Product
+from .models import Color, Size
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -17,3 +18,14 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ['name', 'description']
     search_fields = ('colors', 'sizes')
     filter_horizontal = ('colors', 'sizes')
+
+@admin.register(Color)
+class ColorAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)
+
+# Registrar tallas
+@admin.register(Size)
+class SizeAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    search_fields = ('name',)

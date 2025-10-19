@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from products.models import Product
+from products.models import Product, Color, Size
 
 
 class Cart(models.Model):
@@ -19,20 +19,24 @@ class Cart(models.Model):
         return sum(item.quantity for item in self.items.all())
 
 
+
 class CartItem(models.Model):
-    DoesNotExist = None
     cart = models.ForeignKey(Cart, related_name='items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True, blank=True)  # 🔹 Relación con modelo Color
+    size = models.ForeignKey(Size, on_delete=models.SET_NULL, null=True, blank=True)    # 🔹 Relación con modelo Size
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.quantity} x {self.product.name}"
+        color_display = self.color.name if self.color else '-'
+        size_display = self.size.name if self.size else '-'
+        return f"{self.quantity} x {self.product.name} ({color_display} / {size_display})"
 
     def get_cost(self):
+        """Devuelve el costo total del ítem (precio x cantidad)."""
         return self.product.price * self.quantity
-
 
 class Order(models.Model):
     STATUS_CHOICES = (

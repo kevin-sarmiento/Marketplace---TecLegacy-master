@@ -44,33 +44,63 @@
         </div>
 
         {% if product.is_available %}
-        <form class="add-to-cart-form mb-4">
-<p><strong>Talla:</strong> {{ product.size }}</p>
-<p><strong>Color:</strong> {{ product.color }}</p>
-<p><strong>Tipo:</strong> {{ product.get_gender_display }}</p>
-            <div class="row g-3 align-items-center">
-                <div class="col-auto">
-                    <label for="quantity-{{ product.id }}" class="col-form-label text-light">Cantidad:</label>
-                </div>
-                <div class="col-auto">
-                    <div class="input-group">
-                        <button type="button" class="btn btn-outline-secondary quantity-btn" data-action="decrease">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <input type="number" id="quantity-{{ product.id }}" class="form-control text-center" value="1" min="1" max="{{ product.stock }}">
-                        <button type="button" class="btn btn-outline-secondary quantity-btn" data-action="increase">
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-auto">
-                    <button type="button" class="btn btn-primary btn-lg add-to-cart-btn" data-product-id="{{ product.id }}">
-                        <i class="fas fa-cart-plus me-2"></i>Añadir al Carrito
+    <form id="add-to-cart-form"
+          data-url="{% url 'cart:add_to_cart' product.id %}"
+          method="post"
+          class="add-to-cart-form mb-4">
+        {% csrf_token %}
+
+        <p>
+            <strong>Talla:</strong>
+            <select name="size" id="size-select">
+                <option value="">Seleccione una talla</option>
+                {% for size in product.sizes.all %}
+                <option value="{{ size.id }}">{{ size.name }}</option>
+                {% empty %}
+                <option value="">No hay tallas disponibles</option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            <strong>Color:</strong>
+            <select name="color" id="color-select">
+                <option value="">Seleccione un color</option>
+                {% for color in product.colors.all %}
+                <option value="{{ color.id }}">{{ color.name }}</option>
+                {% empty %}
+                <option value="">No hay colores disponibles</option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p><strong>Tipo:</strong> {{ product.get_gender_display }}</p>
+
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="quantity-{{ product.id }}" class="col-form-label text-light">Cantidad:</label>
+            </div>
+            <div class="col-auto">
+                <div class="input-group">
+                    <button type="button" class="btn btn-outline-secondary quantity-btn" data-action="decrease">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <input type="number" id="quantity-{{ product.id }}" name="quantity" class="form-control text-center"
+                           value="1" min="1" max="{{ product.stock }}">
+                    <button type="button" class="btn btn-outline-secondary quantity-btn" data-action="increase">
+                        <i class="fas fa-plus"></i>
                     </button>
                 </div>
             </div>
-        </form>
-        {% else %}
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-cart-plus me-2"></i> Añadir al Carrito
+                </button>
+            </div>
+        </div>
+    </form>
+
+    {% else %}
         <div class="alert alert-warning">
             Este producto está temporalmente agotado. Vuelve a revisar más tarde.
         </div>
@@ -124,6 +154,50 @@
 
 {% block extra_js %}
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('add-to-cart-form');
+    const cartCount = document.getElementById('cart-items-count'); // contador en el navbar
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault(); // evita recargar la página
+
+        const url = form.dataset.url;
+        const formData = new FormData(form);
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            // ✅ Actualiza el contador del carrito en el navbar
+            if (cartCount && data.cart_items_count !== undefined) {
+                cartCount.textContent = data.cart_items_count;
+            }
+
+            // ✅ Opcional: mostrar un mensaje visual de éxito
+            const btn = form.querySelector('button[type="submit"]');
+            btn.innerHTML = '<i class="fas fa-check"></i> Añadido!';
+            btn.classList.replace('btn-primary', 'btn-success');
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-cart-plus me-2"></i> Añadir al Carrito';
+                btn.classList.replace('btn-success', 'btn-primary');
+            }, 1500);
+        } else {
+            alert("Ocurrió un error al añadir el producto al carrito.");
+        }
+    });
+});
+</script>
+
+
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         // Controles de cantidad
         const quantityInput = document.getElementById('quantity-{{ product.id }}');
@@ -143,4 +217,17 @@
         });
     });
 </script>
+
+<style>
+select {
+    padding: 5px 10px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    appearance: none; /* elimina flecha nativa en algunos navegadores */
+    background: url('data:image/svg+xml;utf8,<svg fill="black" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+    background-color: #fff;
+}
+</style>
+
 {% endblock %}
