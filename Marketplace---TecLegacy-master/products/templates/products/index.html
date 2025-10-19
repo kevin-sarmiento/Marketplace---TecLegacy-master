@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+
+{% block title %}TecLegacy - Tecnología y Gaming{% endblock %}
+
+{% block content %}
+<!-- Sección Hero -->
+<div class="jumbotron text-center my-4 hero-section text-light">
+    <h1 class="display-4">Bienvenido a <span class="accent-gradient">TecLegacy</span></h1>
+    <p class="lead">Tu destino para tecnología y gaming con los mejores precios del mercado</p>
+    <hr class="my-4">
+    <p>Descubre nuestra amplia selección de componentes, periféricos y equipos gaming de última generación</p>
+    <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg mt-3">
+        <i class="fas fa-shopping-bag me-2"></i>Ver Productos
+    </a>
+</div>
+
+<!-- Categorías Destacadas -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center text-light mb-4">Categorías Destacadas</h2>
+    </div>
+
+    {% if categories %}
+        {% for category in categories %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 category-card">
+                <div class="card-body text-center">
+                    {% if category.image %}
+                    <img src="{{ category.image.url }}" alt="{{ category.name }}" class="img-fluid category-image mb-3">
+                    {% else %}
+                    <div class="category-icon mb-3">
+                        <i class="fas fa-laptop fa-3x accent-gradient"></i>
+                    </div>
+                    {% endif %}
+                    <h3 class="card-title">{{ category.name }}</h3>
+                    <p class="card-text">{{ category.description|truncatewords:15 }}</p>
+                    <a href="{% url 'products:products_by_category' category.slug %}" class="btn btn-outline-primary">
+                        Ver Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center">
+            <p class="text-light">Próximamente nuevas categorías de productos</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Productos Destacados -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="text-center text-light mb-4">Productos Destacados</h2>
+    </div>
+
+    {% if featured_products %}
+        {% for product in featured_products %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 product-card">
+                <div class="product-badge">Destacado</div>
+                <a href="{{ product.get_absolute_url }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top product-image">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-truncate">{{ product.description|truncatechars:60 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="price">${{ product.price }}</strong>
+                        <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12 text-center">
+            <p class="text-light">Próximamente nuevos productos destacados</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Sección de Características -->
+<div class="row features-section my-5 text-light">
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-icon mb-3">
+            <i class="fas fa-truck fa-3x"></i>
+        </div>
+        <h3>Envío Rápido</h3>
+        <p>Recibe tus productos en la puerta de tu casa en tiempo récord</p>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-icon mb-3">
+            <i class="fas fa-lock fa-3x"></i>
+        </div>
+        <h3>Pago Seguro</h3>
+        <p>Tus transacciones están protegidas con la mejor tecnología</p>
+    </div>
+    <div class="col-md-4 text-center mb-4">
+        <div class="feature-icon mb-3">
+            <i class="fas fa-headset fa-3x"></i>
+        </div>
+        <h3>Soporte 24/7</h3>
+        <p>Estamos disponibles para ayudarte en todo momento</p>
+    </div>
+</div>
+
+<!-- Call to Action -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Activar chatbot desde el CTA
+    document.addEventListener('DOMContentLoaded', function() {
+        const chatbotCta = document.querySelector('.chatbot-cta');
+        if (chatbotCta) {
+            chatbotCta.addEventListener('click', function() {
+                const chatbotToggle = document.querySelector('.chatbot-toggle');
+                const chatbotContainer = document.querySelector('.chatbot-container');
+
+                if (chatbotContainer.classList.contains('d-none')) {
+                    chatbotToggle.click();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

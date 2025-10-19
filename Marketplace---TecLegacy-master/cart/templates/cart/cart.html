@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% block title %}Tu Carrito - TecLegacy{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="text-light mb-4">Tu Carrito de Compras</h1>
+    </div>
+
+    {% if cart_items %}
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Items en tu carrito ({{ cart_items.count }})</h5>
+            </div>
+            <div class="card-body">
+                <div id="cart-items">
+                    {% for item in cart_items %}
+                    <div id="cart-item-{{ item.id }}" class="cart-item mb-3">
+                        <div class="row align-items-center">
+                            <div class="col-md-2">
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="img-fluid rounded">
+                            </div>
+                            <div class="col-md-5">
+                                <h5 class="mb-1">{{ item.product.name }}</h5>
+                                <p class="text-muted small mb-0">Precio unitario: ${{ item.product.price }}</p>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="input-group">
+                                    <button type="button" class="btn btn-outline-secondary cart-item-control" data-item-id="{{ item.id }}" data-action="decrease">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span id="item-quantity-{{ item.id }}" class="form-control text-center">{{ item.quantity }}</span>
+                                    <button type="button" class="btn btn-outline-secondary cart-item-control" data-item-id="{{ item.id }}" data-action="increase">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-2 text-end">
+                                <span id="item-total-{{ item.id }}" class="h5">${{ item.get_cost }}</span>
+                                <button class="btn btn-sm btn-danger ms-2 cart-item-control" data-item-id="{{ item.id }}" data-action="remove">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% if not forloop.last %}
+                        <hr class="my-3">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'products:product_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Seguir Comprando
+            </a>
+            <button class="btn btn-danger" id="clear-cart">
+                <i class="fas fa-trash me-2"></i>Vaciar Carrito
+            </button>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Resumen del Pedido</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Subtotal</span>
+                    <span id="cart-total">${{ cart.get_total_price }}</span>
+                </div>
+                <div class="d-flex justify-content-between mb-3">
+                    <span>Envío</span>
+                    <span>Gratis</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between mb-4">
+                    <strong>Total</strong>
+                    <strong id="cart-final-total">${{ cart.get_total_price }}</strong>
+                </div>
+
+                <a href="{% url 'cart:checkout' %}" id="checkout-btn" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-shopping-bag me-2"></i>Proceder al Pago
+                </a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h4 class="alert-heading">Tu carrito está vacío</h4>
+            <p>Parece que aún no has añadido productos a tu carrito. Explora nuestro catálogo para encontrar lo que estás buscando.</p>
+            <hr>
+            <a href="{% url 'products:product_list' %}" class="btn btn-primary">
+                <i class="fas fa-shopping-bag me-2"></i>Ver Productos
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Vaciar carrito
+        const clearCartBtn = document.getElementById('clear-cart');
+        if (clearCartBtn) {
+            clearCartBtn.addEventListener('click', function() {
+                if (confirm('¿Estás seguro de que quieres vaciar tu carrito?')) {
+                    const cartItems = document.querySelectorAll('.cart-item');
+                    cartItems.forEach(item => {
+                        const itemId = item.id.replace('cart-item-', '');
+                        const removeBtn = item.querySelector('[data-action="remove"]');
+                        if (removeBtn) {
+                            removeBtn.click();
+                        }
+                    });
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

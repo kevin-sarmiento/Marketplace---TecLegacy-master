@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Pago Exitoso - TecLegacy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle text-success" style="font-size: 5rem;"></i>
+                <h2 class="mt-4">¡Pago Completado con Éxito!</h2>
+                <p class="lead">Gracias por tu compra en TecLegacy.</p>
+
+                <div class="alert alert-success mt-4">
+                    <p class="mb-0">Número de Pedido: <strong>#{{ order.id }}</strong></p>
+                    <p class="mb-0">Referencia de Pago: <strong>{{ order.payment_reference }}</strong></p>
+                </div>
+
+                <p>Hemos enviado un correo a <strong>{{ order.email }}</strong> con los detalles de tu pedido.</p>
+                <p>Tu pedido será procesado pronto y te informaremos cuando sea enviado.</p>
+
+                <div class="mt-4">
+                    <a href="{% url 'users:order_history' %}" class="btn btn-primary">
+                        <i class="fas fa-history me-2"></i>Ver Mis Pedidos
+                    </a>
+                    <a href="{% url 'products:index' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-home me-2"></i>Volver a la Tienda
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

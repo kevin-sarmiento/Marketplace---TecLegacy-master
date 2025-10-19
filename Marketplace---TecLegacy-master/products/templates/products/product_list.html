@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}Todos los Productos{% endif %} - TecLegacy
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Título y descripción -->
+    <div class="col-12">
+        {% if category %}
+            <h1 class="text-light">{{ category.name }}</h1>
+            {% if category.description %}
+                <p class="text-light">{{ category.description }}</p>
+            {% endif %}
+        {% else %}
+            <h1 class="text-light">Todos los Productos</h1>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar con categorías -->
+    <div class="col-md-3 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Categorías</h5>
+            </div>
+            <div class="card-body p-0">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item {% if not category %}active{% endif %}">
+                        <a href="{% url 'products:product_list' %}" class="text-decoration-none {% if not category %}text-white{% endif %}">
+                            Todos los productos
+                        </a>
+                    </li>
+                    {% for cat in categories %}
+                        <li class="list-group-item {% if category.id == cat.id %}active{% endif %}">
+                            <a href="{% url 'products:products_by_category' cat.slug %}" class="text-decoration-none {% if category.id == cat.id %}text-white{% endif %}">
+                                {{ cat.name }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grid de productos -->
+    <div class="col-md-9">
+        <div class="row">
+            {% if products %}
+                {% for product in products %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 product-card">
+                        {% if product.is_featured %}
+                        <div class="product-badge">Destacado</div>
+                        {% endif %}
+                        <a href="{{ product.get_absolute_url }}">
+                            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top product-image">
+                        </a>
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text text-truncate">{{ product.description|truncatechars:60 }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <strong class="price">${{ product.price }}</strong>
+                                <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">
+                                    <i class="fas fa-cart-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12 text-center">
+                    <div class="alert alert-info">
+                        No hay productos disponibles en esta categoría por el momento.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Paginación -->
+        {% if products.paginator.num_pages > 1 %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <nav aria-label="Navegación de páginas">
+                    <ul class="pagination justify-content-center">
+                        {% if products.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1" aria-label="Primera">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.previous_page_number }}" aria-label="Anterior">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+
+                        {% for i in products.paginator.page_range %}
+                            {% if products.number == i %}
+                                <li class="page-item active"><span class="page-link">{{ i }}</span></li>
+                            {% elif i > products.number|add:'-3' and i < products.number|add:'3' %}
+                                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.next_page_number }}" aria-label="Siguiente">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ products.paginator.num_pages }}" aria-label="Última">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Sesión cerrada - TecLegacy{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="text-center">Sesión cerrada</h2>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead">Has cerrado sesión correctamente.</p>
+                <a href="{% url 'users:login' %}" class="btn btn-primary">Iniciar sesión nuevamente</a>
+                <a href="{% url 'products:index' %}" class="btn btn-outline-primary">Volver a la página principal</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

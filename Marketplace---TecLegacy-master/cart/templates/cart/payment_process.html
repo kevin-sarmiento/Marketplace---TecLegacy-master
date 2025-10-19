@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+
+{% block title %}Procesar Pago - TecLegacy{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-option {
+        border: 1px solid #333;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .payment-option:hover, .payment-option.selected {
+        background-color: #2a2a2a;
+        transform: translateY(-3px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .payment-option.selected {
+        border-color: #0d6efd;
+    }
+
+    .payment-logo {
+        height: 40px;
+        object-fit: contain;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1 class="text-light">Finalizar Pago</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'products:index' %}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cart:cart_detail' %}">Carrito</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'cart:checkout' %}">Checkout</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Pago</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Método de Pago: {{ order.get_payment_method_display }}</h5>
+            </div>
+            <div class="card-body">
+                {% if payment_method == 'paypal' %}
+                    <div class="text-center mb-4">
+                        <img src="https://www.paypalobjects.com/webstatic/mktg/logo/pp_cc_mark_111x69.jpg" alt="PayPal" class="img-fluid" style="height: 69px;">
+                    </div>
+                    <p>Estás a punto de realizar el pago con PayPal. Serás redirigido a PayPal para completar el pago.</p>
+
+                    <div id="paypal-button-container" class="mt-4"></div>
+                {% elif payment_method == 'nequi' %}
+                    <div class="text-center mb-4">
+                        <img src="https://seeklogo.com/images/N/nequi-logo-621D279FB9-seeklogo.com.png" alt="Nequi" class="img-fluid" style="height: 69px;">
+                    </div>
+                    <p>Para completar tu pago con Nequi:</p>
+                    <ol>
+                        <li>Abre tu aplicación Nequi</li>
+                        <li>Selecciona "Pagar" y escanea el siguiente código QR</li>
+                        <li>O envía el dinero al número: <strong>300 123 4567</strong></li>
+                        <li>Usa como referencia: <strong>TL-{{ order.id }}</strong></li>
+                    </ol>
+
+                    <div class="text-center mt-4">
+                        <div class="bg-white p-3 d-inline-block">
+                            <!-- Código QR simulado -->
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/QR_code_for_mobile_English_Wikipedia.svg/1200px-QR_code_for_mobile_English_Wikipedia.svg.png" alt="Código QR Nequi" class="img-fluid" style="width: 200px;">
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <form method="post" action="{% url 'cart:payment_execute' order.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check me-2"></i>Ya realicé el pago
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div class="text-center">
+                        <form method="post" action="{% url 'cart:payment_execute' order.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card me-2"></i>Simular Pago
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="{% url 'cart:checkout' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>Volver al Checkout
+            </a>
+            <a href="{% url 'cart:payment_cancel' order.id %}" class="btn btn-outline-danger">
+                <i class="fas fa-times me-2"></i>Cancelar Pago
+            </a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Resumen del Pedido</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush mb-3">
+                    {% for item in order.items.all %}
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">{{ item.product.name }} × {{ item.quantity }}</h6>
+                            <small class="text-muted">{{ item.product.description|truncatechars:50 }}</small>
+                        </div>
+                        <span class="text-muted">${{ item.get_cost }}</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total</span>
+                        <strong>${{ order.total_paid }}</strong>
+                    </li>
+                </ul>
+
+                <div class="row">
+                    <div class="col-6">
+                        <p class="mb-1 fw-bold">Dirección de Envío:</p>
+                        <address>
+                            {{ order.first_name }} {{ order.last_name }}<br>
+                            {{ order.address }}<br>
+                            {{ order.city }}, {{ order.postal_code }}<br>
+                            {{ order.country }}
+                        </address>
+                    </div>
+                    <div class="col-6">
+                        <p class="mb-1 fw-bold">Contacto:</p>
+                        <p class="mb-0">{{ order.email }}</p>
+                        <p class="mb-0">{{ order.phone }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if payment_method == 'paypal' %}
+<script src="https://www.paypal.com/sdk/js?client-id={{ client_id }}&currency=COP"></script>
+<script>
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: '{{ order.total_paid }}'
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                // Enviar los detalles del pago al servidor
+                fetch("{% url 'cart:payment_execute' order.id %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: 'payment_id=' + details.id
+                })
+                .then(response => response.redirected ? window.location = response.url : response.json())
+                .then(data => {
+                    window.location.href = "{% url 'cart:payment_success' order.id %}";
+                });
+            });
+        },
+        onCancel: function() {
+            window.location.href = "{% url 'cart:payment_cancel' order.id %}";
+        }
+    }).render('#paypal-button-container');
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - TecLegacy{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-4">
+        <h1 class="text-light">Finalizar Compra</h1>
+    </div>
+
+    <div class="col-md-8">
+        <form method="post" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Información Personal</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" value="{{ initial_data.first_name }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingresa tu nombre.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label">Apellido *</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" value="{{ initial_data.last_name }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingresa tu apellido.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" value="{{ initial_data.email }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingresa un email válido.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="phone" class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" value="{{ initial_data.phone }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingresa tu número de teléfono.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Información de Envío</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="address" class="form-label">Dirección *</label>
+                            <input type="text" class="form-control" id="address" name="address" value="{{ initial_data.address }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingresa tu dirección de envío.
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="city" class="form-label">Ciudad *</label>
+                            <input type="text" class="form-control" id="city" name="city" value="{{ initial_data.city }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingresa tu ciudad.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="country" class="form-label">País *</label>
+                            <select class="form-select" id="country" name="country" required>
+                                <option value="">Seleccionar...</option>
+                                <option value="Colombia" {% if initial_data.country == "Colombia" %}selected{% endif %}>Colombia</option>
+                                <option value="Argentina" {% if initial_data.country == "Argentina" %}selected{% endif %}>Argentina</option>
+                                <option value="Chile" {% if initial_data.country == "Chile" %}selected{% endif %}>Chile</option>
+                                <option value="México" {% if initial_data.country == "México" %}selected{% endif %}>México</option>
+                                <option value="Perú" {% if initial_data.country == "Perú" %}selected{% endif %}>Perú</option>
+                            </select>
+                            <div class="invalid-feedback">
+                                Por favor selecciona un país.
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="postal_code" class="form-label">Código Postal *</label>
+                            <input type="text" class="form-control" id="postal_code" name="postal_code" value="{{ initial_data.postal_code }}" required>
+                            <div class="invalid-feedback">
+                                Por favor ingresa tu código postal.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Método de Pago</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input id="credit" name="payment_method" type="radio" class="form-check-input" value="credit_card" checked required>
+                                <label class="form-check-label" for="credit">Tarjeta de Crédito</label>
+                            </div>
+                            <div class="form-check">
+                                <input id="debit" name="payment_method" type="radio" class="form-check-input" value="debit_card" required>
+                                <label class="form-check-label" for="debit">Tarjeta de Débito</label>
+                            </div>
+                            <div class="form-check">
+                                <input id="paypal" name="payment_method" type="radio" class="form-check-input" value="paypal" required>
+                                <label class="form-check-label" for="paypal">PayPal</label>
+                            </div>
+                        </div>
+
+                        <div id="credit_card_fields" class="col-12">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="cc_name" class="form-label">Nombre en la tarjeta</label>
+                                    <input type="text" class="form-control" id="cc_name" placeholder="">
+                                    <small class="text-muted">Nombre completo como aparece en la tarjeta</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cc_number" class="form-label">Número de la tarjeta</label>
+                                    <input type="text" class="form-control" id="cc_number" placeholder="XXXX XXXX XXXX XXXX">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="cc_expiration" class="form-label">Vencimiento</label>
+                                    <input type="text" class="form-control" id="cc_expiration" placeholder="MM/AA">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="cc_cvv" class="form-label">CVV</label>
+                                    <input type="text" class="form-control" id="cc_cvv" placeholder="XXX">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <p class="text-muted small">
+                                <i class="fas fa-lock me-1"></i> Todos tus datos están protegidos y encriptados. Esta es una demo de pago simulado.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'cart:cart_detail' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Volver al Carrito
+                </a>
+                <button class="btn btn-primary btn-lg" type="submit">
+                    <i class="fas fa-credit-card me-2"></i>Finalizar Compra
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Resumen del Pedido</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush mb-3">
+                    {% for item in cart.items.all %}
+                    <li class="list-group-item d-flex justify-content-between lh-sm">
+                        <div>
+                            <h6 class="my-0">{{ item.product.name }} × {{ item.quantity }}</h6>
+                            <small class="text-muted">{{ item.product.description|truncatechars:50 }}</small>
+                        </div>
+                        <span class="text-muted">${{ item.get_cost }}</span>
+                    </li>
+                    {% endfor %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>Total</span>
+                        <strong>${{ cart.get_total_price }}</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mostrar/ocultar campos de tarjeta según el método de pago seleccionado
+        const paymentMethods = document.querySelectorAll('input[name="payment_method"]');
+        const creditCardFields = document.getElementById('credit_card_fields');
+
+        paymentMethods.forEach(method => {
+            method.addEventListener('change', function() {
+                if (this.value === 'credit_card' || this.value === 'debit_card') {
+                    creditCardFields.classList.remove('d-none');
+                } else {
+                    creditCardFields.classList.add('d-none');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

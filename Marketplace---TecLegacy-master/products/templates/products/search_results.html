@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Resultados de búsqueda: {{ query }} - TecLegacy{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="text-light">Resultados de búsqueda</h1>
+        {% if query %}
+            <p class="text-light">Mostrando resultados para: <strong>"{{ query }}"</strong></p>
+        {% endif %}
+    </div>
+
+    {% if products %}
+        {% for product in products %}
+        <div class="col-md-3 mb-4">
+            <div class="card h-100 product-card">
+                {% if product.is_featured %}
+                <div class="product-badge">Destacado</div>
+                {% endif %}
+                <a href="{{ product.get_absolute_url }}">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="card-img-top product-image">
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-truncate">{{ product.description|truncatechars:60 }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <strong class="price">${{ product.price }}</strong>
+                        <button class="btn btn-primary btn-sm add-to-cart-btn" data-product-id="{{ product.id }}">
+                            <i class="fas fa-cart-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                {% if query %}
+                    No se encontraron productos que coincidan con "{{ query }}". Intenta con otra búsqueda.
+                {% else %}
+                    Por favor, ingresa un término de búsqueda.
+                {% endif %}
+            </div>
+
+            <div class="mt-4">
+                <h3 class="text-light">¿No encuentras lo que buscas?</h3>
+                <p class="text-light">Prueba usando nuestro chatbot para una búsqueda más asistida, o explora nuestras categorías:</p>
+
+                <div class="row mt-3">
+                    {% for category in categories %}
+                        <div class="col-md-4 mb-3">
+                            <a href="{% url 'products:products_by_category' category.slug %}" class="btn btn-outline-primary btn-lg w-100">
+                                {{ category.name }}
+                            </a>
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <p class="text-light">No hay categorías disponibles.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Regresar a productos -->
+    <div class="col-12 mt-4 text-center">
+        <a href="{% url 'products:product_list' %}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Ver todos los productos
+        </a>
+    </div>
+</div>
+{% endblock %}
