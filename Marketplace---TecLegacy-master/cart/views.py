@@ -7,22 +7,18 @@ from products.models import Product
 from .models import Cart, CartItem, Order, OrderItem
 import json
 import uuid
+from products.models import Product, Category
 
 
 def _get_or_create_cart(request):
     """Función auxiliar para obtener o crear un carrito."""
-    # Si el usuario está autenticado, busca su carrito
     if request.user.is_authenticated:
         cart, created = Cart.objects.get_or_create(user=request.user)
-    # Si no está autenticado, usa la sesión
     else:
-        # Asegúrate de que la sesión exista
         if not request.session.session_key:
             request.session.create()
-
         session_id = request.session.session_key
         cart, created = Cart.objects.get_or_create(session_id=session_id)
-
     return cart
 
 
@@ -30,10 +26,12 @@ def cart_detail(request):
     """Vista para mostrar el detalle del carrito."""
     cart = _get_or_create_cart(request)
     cart_items = cart.items.all()
+    categories = Category.objects.filter(is_active=True)
 
     context = {
         'cart': cart,
         'cart_items': cart_items,
+        'categories': categories
     }
     return render(request, 'cart/cart.html', context)
 
@@ -43,7 +41,6 @@ def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id, is_available=True)
     cart = _get_or_create_cart(request)
 
-    # Obtenemos datos
     color_id = request.POST.get('color') or request.GET.get('color')
     size_id = request.POST.get('size') or request.GET.get('size')
     quantity = int(request.POST.get('quantity', 1))
@@ -59,7 +56,6 @@ def add_to_cart(request, product_id):
         from products.models import Size
         size = Size.objects.filter(id=size_id).first()
 
-    # Verificamos si ya existe el mismo producto con ese color y talla
     cart_item, created = CartItem.objects.get_or_create(
         cart=cart,
         product=product,
@@ -72,7 +68,6 @@ def add_to_cart(request, product_id):
         cart_item.quantity += quantity
         cart_item.save()
 
-    # Si es AJAX, devolvemos JSON (sin redirigir)
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
@@ -81,9 +76,7 @@ def add_to_cart(request, product_id):
             'cart_total': str(cart.get_total_price())
         })
 
-    # Si no es AJAX, redirige normalmente
     return redirect('cart:cart_detail')
-
 
 
 def update_cart(request):
@@ -135,23 +128,21 @@ def checkout(request):
     """Vista para el proceso de checkout."""
     cart = _get_or_create_cart(request)
 
-    # Si el carrito está vacío, redirige a la vista del carrito
     if cart.items.count() == 0:
         messages.info(request, 'Tu carrito está vacío. Añade algunos productos antes de hacer checkout.')
         return redirect('cart:cart_detail')
 
-    # Si es una petición POST, procesa el formulario de pedido
     if request.method == 'POST':
-        # Validar que todos los campos necesarios estén presentes
-        required_fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'city', 'country', 'postal_code',
-                           'payment_method']
+        required_fields = [
+            'first_name', 'last_name', 'email', 'phone',
+            'address', 'city', 'country', 'postal_code', 'payment_method'
+        ]
 
         for field in required_fields:
             if not request.POST.get(field):
                 messages.error(request, f'El campo {field} es obligatorio')
                 return redirect('cart:checkout')
 
-        # Crear un nuevo pedido
         order = Order.objects.create(
             user=request.user,
             first_name=request.POST.get('first_name'),
@@ -166,7 +157,6 @@ def checkout(request):
             payment_method=request.POST.get('payment_method')
         )
 
-        # Crear items del pedido basados en el carrito
         for item in cart.items.all():
             OrderItem.objects.create(
                 order=order,
@@ -175,13 +165,10 @@ def checkout(request):
                 quantity=item.quantity
             )
 
-        # Vaciar el carrito
         cart.items.all().delete()
-
         messages.success(request, '¡Tu pedido ha sido creado correctamente!')
         return redirect('cart:payment_process', order_id=order.id)
 
-    # Prepopular campos con información del perfil si existe
     initial_data = {}
     if hasattr(request.user, 'profile'):
         profile = request.user.profile
@@ -208,19 +195,15 @@ def payment_process(request, order_id):
     """Vista para procesar el pago de una orden."""
     order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    # Si el pago ya está completo, redirigir a la página de éxito
     if order.payment_status == 'completado':
         return redirect('cart:payment_success', order_id=order.id)
 
     payment_method = order.payment_method
-
     context = {
         'order': order,
         'payment_method': payment_method,
-        'client_id': 'PAYPAL_CLIENT_ID',  # En producción, esto vendría de las variables de entorno
+        'client_id': 'PAYPAL_CLIENT_ID',
     }
-
-    # Usar el nombre correcto de la plantilla
     return render(request, 'cart/payment_process.html', context)
 
 
@@ -230,17 +213,13 @@ def payment_execute(request, order_id):
     if request.method == 'POST':
         order = get_object_or_404(Order, id=order_id, user=request.user)
 
-        # Simular un pago exitoso
         payment_id = request.POST.get('payment_id', '')
-
         if not payment_id:
-            # Generar un ID de pago simulado
             payment_id = f"PAY-{uuid.uuid4().hex[:16].upper()}"
 
-        # Actualizar la orden
         order.payment_status = 'completado'
         order.payment_reference = payment_id
-        order.status = 'procesando'  # El estado del pedido pasa a procesando
+        order.status = 'procesando'
         order.save()
 
         messages.success(request, '¡Tu pago se ha procesado correctamente!')
@@ -253,12 +232,7 @@ def payment_execute(request, order_id):
 def payment_success(request, order_id):
     """Vista de éxito después del pago."""
     order = get_object_or_404(Order, id=order_id, user=request.user)
-
-    context = {
-        'order': order,
-    }
-
-    # Usar el nombre correcto de la plantilla
+    context = {'order': order}
     return render(request, 'cart/payment_success.html', context)
 
 
@@ -266,8 +240,6 @@ def payment_success(request, order_id):
 def payment_cancel(request, order_id):
     """Vista para cancelar el pago."""
     order = get_object_or_404(Order, id=order_id, user=request.user)
-
-    # Actualizar la orden
     order.payment_status = 'fallido'
     order.save()
 

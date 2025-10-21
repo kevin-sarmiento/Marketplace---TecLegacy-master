@@ -19,24 +19,25 @@ def chatbot_query(request):
 
             # Palabras clave para buscar por categoría
             category_keywords = {
-                'portatil': 'Portátiles Gaming',
-                'laptop': 'Portátiles Gaming',
-                'notebook': 'Portátiles Gaming',
-                'gaming': None,# Buscar en todas las categorías con "gaming"
-                'juego': None,
-                'teclado': 'Periféricos',
-                'mouse': 'Periféricos',
-                'raton': 'Periféricos',
-                'auricular': 'Periféricos',
-                'cascos': 'Periféricos',
-                'tarjeta': 'Componentes',
-                'grafica': 'Componentes',
-                'procesador': 'Componentes',
-                'cpu': 'Componentes',
-                'placa': 'Componentes',
-                'monitor': 'Monitores',
-                'pantalla': 'Monitores',
-                'silla': 'Sillas Gaming',
+                'deportivo': 'Deportivos',
+                'tenis': 'Deportivos',
+                'gym': 'Deportivos',
+
+                'elegante': 'Elegantes',
+                'formal': 'Elegantes',
+
+                'casual': 'Casuales',
+                'diario': 'Casuales',
+
+                'sandalia': 'Sandalias',
+                'chancla': 'Sandalias',
+
+                'tacon': 'Tacones',
+                'tacón': 'Tacones',
+                'alto': 'Tacones',
+
+                'bota': 'Botas',
+                'botin': 'Botas',
             }
 
             # Patrones para extraer información de precio
@@ -59,7 +60,7 @@ def chatbot_query(request):
             help_keywords = ['ayuda', 'ayudame', 'como funciona', 'que haces']
 
             if any(greeting in query for greeting in greetings):
-                response = "¡Hola! Soy el asistente de TecLegacy. Puedo ayudarte a encontrar productos gaming y tecnología. ¿Qué estás buscando hoy?"
+                response = "¡Hola! Soy el asistente de Glam Shoes. Puedo ayudarte a encontrar zapatos para cualquier ocasion. ¿Qué estás buscando hoy?"
                 chat_query.response = response
                 chat_query.save()
                 return JsonResponse({
@@ -68,7 +69,7 @@ def chatbot_query(request):
                 })
 
             if any(keyword in query for keyword in help_keywords):
-                response = "Puedo ayudarte a encontrar productos en nuestra tienda. Prueba preguntándome por productos específicos como 'muéstrame teclados gaming' o 'busco un monitor de 27 pulgadas'. También puedes indicarme un rango de precio como 'monitores por menos de 500'."
+                response = "Puedo ayudarte a encontrar productos en nuestra tienda. Prueba preguntándome por productos específicos como 'muestrame este zapato en especifico' o 'busco tacones'. También puedes indicarme un rango de precio como 'zapatos por menos de 100000'."
                 chat_query.response = response
                 chat_query.save()
                 return JsonResponse({
@@ -111,9 +112,9 @@ def chatbot_query(request):
             # Crear respuesta basada en los resultados
             if products.exists():
                 if max_price:
-                    response = f"He encontrado estos productos tacaño, por menos de ${max_price / 1000}k:<br>"
+                    response = f"Encontre estos zapatos, por menos de ${max_price / 1000}k:<br>"
                 else:
-                    response = "He encontrado estos productos para que compre si o si:<br>"
+                    response = "He encontrado estos zapatos que coincidieron con tu petición.:<br>"
 
                 for product in products:
                     price_formatted = '{:,.0f}'.format(product.price).replace(',', '.')
@@ -122,7 +123,7 @@ def chatbot_query(request):
                 if products.count() == 5:
                     response += "<br>Estos son solo algunos resultados. ¿Quieres más detalles o buscar algo más específico?"
             else:
-                response = f"Lo siento, no encontré productos que coincidan con '{query}'. Prueba con otra busqueda o lo veo pues describiendo mejor lo que busca aaa."
+                response = f"Lo siento, no encontré productos que coincidan con '{query}'. Prueba con otra busqueda."
 
                 # Sugerir categorías disponibles
                 categories = Category.objects.filter(is_active=True)

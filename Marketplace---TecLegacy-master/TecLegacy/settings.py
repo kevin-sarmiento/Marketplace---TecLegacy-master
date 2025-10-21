@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Seguridad y entorno
 SECRET_KEY = os.getenv("SECRET_KEY", "django-incecure-key-for-dev")
-DEBUG = "True"
+DEBUG = True  # ⚠️ Cambiado a booleano (sin comillas)
 SECURE_SSL_REDIRECT = False
 ALLOWED_HOSTS = ['*']
 
@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_extensions',
-    
+
     # Apps del proyecto
     'users',
     'products',
@@ -76,9 +76,6 @@ DATABASES = {
     }
 }
 
-
-
-
 # Validación de contraseñas
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
@@ -88,16 +85,24 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internacionalización
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'es'  # 🇪🇸 ajustado a español
+TIME_ZONE = 'America/Bogota'  # ⏰ zona horaria correcta
 USE_I18N = True
 USE_TZ = True
 
-# Configuración de archivos estáticos y medios
+# -----------------------------------------------------------
+# 📦 Archivos estáticos y multimedia (corregido)
+# -----------------------------------------------------------
+
+# Archivos estáticos
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# Archivos de medios (subidos por los usuarios)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# -----------------------------------------------------------
 
 # Configuración de producción
 if not DEBUG:
@@ -117,9 +122,9 @@ SESSION_COOKIE_AGE = 86400  # 24 horas
 SESSION_COOKIE_SECURE = False  # En producción, debe ser True
 
 # Rutas de redirección para login/logout
-LOGIN_URL = 'users:login'  # Redirige aquí cuando se requiere login
-LOGIN_REDIRECT_URL = '/'    # Redirige aquí después de login exitoso
-LOGOUT_REDIRECT_URL = '/'   # Redirige aquí después de logout
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Configuración de Whitenoise para archivos estáticos en producción
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

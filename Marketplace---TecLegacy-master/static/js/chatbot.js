@@ -68,7 +68,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 });
             } else {
-                appendMessage('bot', 'No lo siento pero ha ocurrido un error. Inténtalo de nuevo más tarde que le quedan como 60 años.');
+                appendMessage('bot', 'ha ocurrido un error. Inténtalo de nuevo más tarde.');
             }
 
             // Scroll al final de los mensajes
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error:', error);
             typingIndicator.remove();
-            appendMessage('bot', 'Lo siento, ha ocurrido un error de conexión. Inténtalo de nuevo más tarde o preguntar a arle.');
+            appendMessage('bot', 'Lo siento, ha ocurrido un error de conexión. Inténtalo de nuevo más tarde.');
             chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
         });
     }
@@ -129,6 +129,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Mensaje de bienvenida inicial (opcional)
     setTimeout(() => {
-        appendMessage('bot', '¡Hola! Soy el asistente y mascota de TecLegacy Juanjo. ¿En qué puedo ayudarte hoy? Puedes preguntarme por productos gaming o servicios privados en persona.');
+        appendMessage('bot', '¡Hola! Soy el asistente de Glam Shoes. ¿En qué puedo ayudarte hoy? Puedes preguntarme por todo tipo de calzado.');
     }, 500);
 });

@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
     <div class="container">
         <a class="navbar-brand" href="{% url 'products:index' %}">
-            <span class="accent-gradient">TecLegacy</span>
+            <span class="accent-gradient">Glam Shoes</span>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
@@ -29,6 +29,14 @@
             </ul>
 
             <!-- Búsqueda -->
+<form class="d-flex my-2 my-lg-0 me-3" action="{% url 'products:search' %}" method="get">
+                <div class="input-group">
+                    <input class="form-control" type="search" name="q" placeholder="Buscar productos..." aria-label="Search">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
 
 
             <!-- Carrito y Usuario -->
@@ -49,7 +57,7 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                         <li><a class="dropdown-item" href="{% url 'users:profile' %}">Mi Perfil</a></li>
-                        <li><a class="dropdown-item" href="{% url 'users:order_history' %}">Mis Pedidos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'users:profile' %}#orders">Mis Pedidos</a></li>
                         {% if user.is_staff %}
                         <li><a class="dropdown-item" href="{% url 'admin:index' %}">Administración</a></li>
                         {% endif %}

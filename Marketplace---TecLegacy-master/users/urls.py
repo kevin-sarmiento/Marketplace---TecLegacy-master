@@ -10,19 +10,27 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile, name='profile'),
     path('orders/', views.order_history, name='order_history'),
+
+    # URLs para direcciones
+    path('address/add/', views.add_address, name='add_address'),
+    path('address/<int:address_id>/edit/', views.edit_address, name='edit_address'),
+    path('address/<int:address_id>/delete/', views.delete_address, name='delete_address'),
+
     # URLs para recuperación de contraseña
     path('password-reset/',
-         auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'), #No hay aun esta para resetear
+         auth_views.PasswordResetView.as_view(template_name='users/password_reset.html'),
          name='password_reset'),
     path('password-reset/done/',
-         auth_views.PasswordResetDoneView.as_view(template_name='users/password_reset_done.html'),  #Tampoco
+         auth_views.PasswordResetDoneView.as_view(template_name='users/password_reset_done.html'),
          name='password_reset_done'),
     path('password-reset-confirm/<uidb64>/<token>/',
-         auth_views.PasswordResetConfirmView.as_view(template_name='users/password_reset_confirm.html'),   #Tampoco
+         auth_views.PasswordResetConfirmView.as_view(template_name='users/password_reset_confirm.html'),
          name='password_reset_confirm'),
     path('password-reset-complete/',
-         auth_views.PasswordResetCompleteView.as_view(template_name='users/password_reset_complete.html'),   #Tampoco
+         auth_views.PasswordResetCompleteView.as_view(template_name='users/password_reset_complete.html'),
          name='password_reset_complete'),
 ]
-
-
+from django.conf import settings
+from django.conf.urls.static import static
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

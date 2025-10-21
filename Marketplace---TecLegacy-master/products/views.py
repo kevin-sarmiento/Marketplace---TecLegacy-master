@@ -3,6 +3,7 @@ from django.core.paginator import Paginator
 from .models import Category, Product
 from django.db import models
 
+
 def index(request):
     """Vista de la página principal con productos destacados."""
     featured_products = Product.objects.filter(is_featured=True, is_available=True)[:8]
@@ -40,6 +41,8 @@ def product_list(request, category_slug=None):
     return render(request, 'products/product_list.html', {'products': products})
 
 
+
+
 def product_detail(request, category_slug, product_slug):
     """Detalle de un producto específico."""
     product = get_object_or_404(
@@ -55,14 +58,15 @@ def product_detail(request, category_slug, product_slug):
         is_available=True
     ).exclude(id=product.id)[:4]
 
+    # Categorías activas
+    categories = Category.objects.filter(is_active=True)
+
     context = {
         'product': product,
         'related_products': related_products,
+        'categories': categories,  # <-- aquí las pasamos al template
     }
     return render(request, 'products/product_detail.html', context)
-
-    product = get_object_or_404(Product, slug=product_slug, category__slug=category_slug)
-    return render(request, 'products/product_detail.html', {'product': product})
 
 def search_products(request):
     """Búsqueda de productos."""
